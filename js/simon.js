@@ -32,45 +32,93 @@ function NoteBox(key, onClick) {
 		// Set active class for NOTE_DURATION time
 		boxEl.classList.add('active');
 		setTimeout(function () {
-			playing--
+			playing--;
 			if (!playing) {
 				boxEl.classList.remove('active');
 			}
 		}, NOTE_DURATION)
-	}
+	};
 
 	// Enable this NoteBox
 	this.enable = function () {
 		enabled = true;
-	}
+	};
 
 	// Disable this NoteBox
 	this.disable = function () {
 		enabled = false;
-	}
+	};
 
 	// Call this NoteBox's clickHandler and play the note.
 	this.clickHandler = function () {
 		if (!enabled) return;
 
-		this.onClick(this.key)
-		this.play()
-	}.bind(this)
+		this.onClick(this.key);
+		this.play();
+	}.bind(this);
 
 	boxEl.addEventListener('mousedown', this.clickHandler);
 }
 
-// Example usage of NoteBox.
-//
-// This will create a map from key strings (i.e. 'c') to NoteBox objects so that
-// clicking the corresponding boxes on the page will play the NoteBox's audio.
-// It will also demonstrate programmatically playing notes by calling play directly.
-var notes = {};
+function playSimon() {
+	let notes = {};
+	let notesToPlay = [];
+	let noteIndex = 0;
 
-KEYS.forEach(function (key) {
-	notes[key] = new NoteBox(key);
-});
+	setup(notes);
+	incrementRound(notesToPlay, notes);
 
-KEYS.concat(KEYS.slice().reverse()).forEach(function(key, i) {
-	setTimeout(notes[key].play.bind(null, key), i * NOTE_DURATION);
-});
+// adds event listeners to each box
+	for (let key of KEYS) {
+		document.getElementById(key).addEventListener('mousedown', function() {
+			reactToUserInput(this);});
+	}
+
+	function reactToUserInput(documentBox) {
+		getUserInput(documentBox);
+		// successfully reached end of round, wait until end of note then start new round
+		if (noteIndex > 0 && noteIndex === notesToPlay.length) {
+			noteIndex = 0; // reset the index to look at
+			setTimeout(function () {incrementRound(notesToPlay, notes)}, 2 * NOTE_DURATION);
+		}
+	}
+
+	function getUserInput(documentBox) {
+		if (notesToPlay.length > 0) {
+			if(document.getElementById(notesToPlay[noteIndex].key) !== documentBox) {
+				notesToPlay = []; // reset the sequence
+				noteIndex = 0; // reset the index to look at
+				setTimeout(function() {incrementRound(notesToPlay, notes)}, 2 * NOTE_DURATION);
+			} else {
+				noteIndex++; // increment the index to look at
+			}
+		}
+	}
+}
+
+// generates notes, adds them to notesToPlay, and plays the NoteBoxes in notesToPlay
+function incrementRound(notesToPlay, notes) {
+	generateNotes(notesToPlay, notes);
+	playNotes(notesToPlay);
+}
+
+// Plays the notes in notesToPlay
+function playNotes(notesToPlay) {
+	notesToPlay.forEach(function(note, i) {
+		setTimeout(note.play, i * NOTE_DURATION);
+	});
+}
+
+// Generates a new random NoteBox to add to notesToPlay
+function generateNotes(notesToPlay, notes) {
+	notesToPlay.push(notes[KEYS[Math.floor(Math.random() * KEYS.length)]]);
+}
+
+// Sets up the notes to each box by going through each key and assigns it to the corresponding box
+function setup(notes) {
+	KEYS.forEach(function (key) {
+		notes[key] = new NoteBox(key);
+	});
+}
+playSimon();
+
