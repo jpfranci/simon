@@ -2,6 +2,8 @@
 - Chrome failed to play audio of first note properly, citing an uncaught promise on the NoteBox class. 
 Was not altered as NoteBox is supposed to not be altered. This was fixed after the first input from the user.
 
+- Had to remove first / of every link on HTML page as it just displayed an empty HTML page without doing so. For example /media became media/. Had to include HTML language tag.
+
 - Note: this is a rough submission, so I didn't use the onclick argument of the NoteBox constructor.
 
 ## Methods
